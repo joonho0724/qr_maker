@@ -87,19 +87,72 @@ function App() {
         dataUrl = canvas.toDataURL('image/png');
       }
 
-      // 이미지 다운로드
-      const blob = dataURLtoBlob(dataUrl);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `qr-code-${index + 1}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // 모바일에서 사진첩에 저장하기 위해 새 창에서 이미지 열기
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>QR 코드 ${index + 1}</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body {
+                  margin: 0;
+                  padding: 20px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  min-height: 100vh;
+                  background: #f5f5f5;
+                }
+                img {
+                  max-width: 100%;
+                  height: auto;
+                  border: 2px solid #ddd;
+                  border-radius: 8px;
+                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                }
+                .instruction {
+                  margin-top: 20px;
+                  padding: 15px;
+                  background: white;
+                  border-radius: 8px;
+                  text-align: center;
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                  color: #333;
+                  max-width: 300px;
+                }
+                .instruction strong {
+                  color: #4f46e5;
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" alt="QR 코드 ${index + 1}" />
+              <div class="instruction">
+                <strong>이미지를 길게 눌러</strong><br>
+                "이미지 저장" 또는 "사진에 저장"을 선택하세요
+              </div>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        // 팝업이 차단된 경우 다운로드로 대체
+        const blob = dataURLtoBlob(dataUrl);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qr-code-${index + 1}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
     } catch (error) {
-      console.error('이미지 다운로드 실패:', error);
-      alert('이미지 다운로드 중 오류가 발생했습니다.');
+      console.error('이미지 저장 실패:', error);
+      alert('이미지 저장 중 오류가 발생했습니다.');
     }
   };
 
