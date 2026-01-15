@@ -5,7 +5,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   // GitHub Pages 배포 시 base 경로 설정
-  // 환경 변수 VITE_BASE_URL이 있으면 사용, 없으면 루트 경로 사용
+  // 로컬 개발: '/' (환경 변수 없음)
+  // GitHub Pages: '/qr_maker/' (GitHub Actions에서 VITE_BASE_URL 설정)
   base: process.env.VITE_BASE_URL || '/',
   build: {
     outDir: 'dist',
