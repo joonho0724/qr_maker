@@ -66,6 +66,43 @@ function App() {
     }
   };
 
+  const handleDownloadSingle = async (index, item) => {
+    try {
+      let dataUrl;
+      if (item.imageUrl) {
+        dataUrl = await generateQRWithImage(
+          item.url,
+          item.imageUrl,
+          item.imageSize,
+          512 // 고해상도로 생성
+        );
+      } else {
+        // 이미지가 없는 경우 기본 QR코드 생성
+        const QRCode = (await import('qrcode')).default;
+        const canvas = document.createElement('canvas');
+        await QRCode.toCanvas(canvas, item.url, {
+          width: 512,
+          margin: 2,
+        });
+        dataUrl = canvas.toDataURL('image/png');
+      }
+
+      // 이미지 다운로드
+      const blob = dataURLtoBlob(dataUrl);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `qr-code-${index + 1}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('이미지 다운로드 실패:', error);
+      alert('이미지 다운로드 중 오류가 발생했습니다.');
+    }
+  };
+
   const handleGenerateAll = async () => {
     // 유효성 검사
     const validItems = items.filter(item => item.url.trim() !== '');
@@ -211,6 +248,17 @@ function App() {
                         alt={`QR 미리보기 ${index + 1}`}
                         className="w-full max-w-[200px] sm:max-w-xs mx-auto border border-gray-300 rounded"
                       />
+                    </div>
+                    <div className="mt-3 flex justify-center">
+                      <button
+                        onClick={() => handleDownloadSingle(index, item)}
+                        className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors touch-manipulation min-h-[44px] flex items-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        이미지 저장
+                      </button>
                     </div>
                   </div>
                 )}
