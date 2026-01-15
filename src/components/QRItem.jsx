@@ -79,7 +79,6 @@ function QRItem({ item, index, onUpdate, onRemove, canRemove }) {
               accept="image/*"
               onChange={handleImageUpload}
               className="hidden"
-              capture="environment"
             />
             {imagePreview && (
               <div className="flex items-center gap-2 sm:gap-3">
